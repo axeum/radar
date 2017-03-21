@@ -13,7 +13,7 @@ checkout:
     - mkdir -p "$GOPATH/src/$IMPORT_PATH"
     - rsync -azC --delete $HOME/$CIRCLE_PROJECT_REPONAME/ $GOPATH/src/$IMPORT_PATH/
 
-tests:
+test:
   override:
     - echo "No tests!"
 
