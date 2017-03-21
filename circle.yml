@@ -1,12 +1,23 @@
 machine:
   services:
     - docker
+  environment:
+    GOPATH: /home/ubuntu/.go_workspace
+    IMPORT_PATH: github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+
+general:
+  build_dir: ../.go_workspace/src/$IMPORT_PATH
+
+checkout:
+  post:
+    - mkdir -p "$GOPATH/src/$IMPORT_PATH"
+    - rsync -azC --delete $HOME/$CIRCLE_PROJECT_REPONAME/ $GOPATH/src/$IMPORT_PATH/
 
 deployment:
   production:
     tag: /^[0-9]+\.[0-9]+\.[0-9]+$/
     commands:
-      - ./build-radar.sh
+      - docker build --no-cache=true -t ictu/radar .
       - docker tag ictu/radar ictu/radar:${CIRCLE_TAG}
       - MAJOR_VERSION=${CIRCLE_TAG/.*}; docker tag ictu/radar:${CIRCLE_TAG} ictu/radar:${MAJOR_VERSION}
       - MINOR_VERSION=${CIRCLE_TAG%.*}; docker tag ictu/radar:${CIRCLE_TAG} ictu/radar:${MINOR_VERSION}
@@ -18,6 +29,6 @@ deployment:
   master:
     branch: master
     commands:
-      - ./build-radar.sh
+      - docker build --no-cache=true -t ictu/radar .
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - docker push ictu/radar
