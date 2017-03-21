@@ -123,8 +123,13 @@ func handleContainerEvent(event *docker.APIEvents) {
 			}
 		}
 	case "die":
-		log.Printf("Container '%s' %v", containerName, event.Action)
-		removeDNSRecord(containerID)
+		if containerInfo := containerInfo(containerID); containerInfo != nil {
+			containerType := containerInfo.Config.Labels["bigboat.service.type"]
+			if containerType == "net" {
+				log.Printf("Container '%s' %v", containerName, event.Action)
+				removeDNSRecord(containerID)
+			}
+		}
 	}
 }
 
