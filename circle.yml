@@ -17,6 +17,7 @@ deployment:
   production:
     tag: /^[0-9]+\.[0-9]+\.[0-9]+$/
     commands:
+      - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go get -d -v; go build -a --installsuffix cgo -v -o radar
       - docker build --no-cache=true -t ictu/radar .
       - docker tag ictu/radar ictu/radar:${CIRCLE_TAG}
       - MAJOR_VERSION=${CIRCLE_TAG/.*}; docker tag ictu/radar:${CIRCLE_TAG} ictu/radar:${MAJOR_VERSION}
@@ -29,6 +30,7 @@ deployment:
   master:
     branch: master
     commands:
+      - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go get -d -v; go build -a --installsuffix cgo -v -o radar
       - docker build --no-cache=true -t ictu/radar .
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - docker push ictu/radar
