@@ -1,0 +1,23 @@
+machine:
+  services:
+    - docker
+
+deployment:
+  production:
+    tag: /^[0-9]+\.[0-9]+\.[0-9]+$/
+    commands:
+      - ./build-radar.sh
+      - docker tag ictu/radar ictu/radar:${CIRCLE_TAG}
+      - MAJOR_VERSION=${CIRCLE_TAG/.*}; docker tag ictu/radar:${CIRCLE_TAG} ictu/radar:${MAJOR_VERSION}
+      - MINOR_VERSION=${CIRCLE_TAG%.*}; docker tag ictu/radar:${CIRCLE_TAG} ictu/radar:${MINOR_VERSION}
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+      - docker push ictu/radar
+      - docker push ictu/radar:${CIRCLE_TAG}
+      - docker push ictu/radar:${MINOR_VERSION}
+      - docker push ictu/radar:${MAJOR_VERSION}
+  master:
+    branch: master
+    commands:
+      - ./build-radar.sh
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+      - docker push ictu/radar
